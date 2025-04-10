@@ -54,9 +54,9 @@ class ToolsetApp:
                              "Open the web-based chat interface", 
                              self.open_chat_app)
         
-        self.create_tool_card(0, 1, "Future Tool 1", 
-                             "Coming soon: Description of future tool 1", 
-                             lambda: self.show_message("Future Tool 1 coming soon!"))
+        self.create_tool_card(0, 1, "SciSearch Tool", 
+                             "Search for computer scientists and their publications on DBLP", 
+                             self.open_sci_search)
         
         self.create_tool_card(1, 0, "Future Tool 2", 
                              "Coming soon: Description of future tool 2", 
@@ -120,21 +120,37 @@ class ToolsetApp:
         app_path = os.path.join(chat_dir, 'app.py')
         
         # Run Flask app in a separate thread
-        threading.Thread(target=self.run_flask_app, args=(app_path,)).start()
+        threading.Thread(target=self.run_flask_app, args=(app_path, 5000, 'Chat')).start()
         
         # Give Flask a moment to start
-        self.root.after(1500, self.open_browser)
+        self.root.after(1500, lambda: self.open_browser(5000, "chat"))
     
-    def run_flask_app(self, app_path):
+    def open_sci_search(self):
+        self.status_bar.config(text="Starting SciSearch application...")
+        
+        # Determine the path to the sci_search application
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        sci_search_dir = os.path.join(current_dir, 'sci_search')
+        app_path = os.path.join(sci_search_dir, 'app.py')
+        
+        # Run Flask app in a separate thread
+        threading.Thread(target=self.run_flask_app, args=(app_path, 5001, 'SciSearch')).start()
+        
+        # Give Flask a moment to start
+        self.root.after(1500, lambda: self.open_browser(5001, "SciSearch"))
+    
+    def run_flask_app(self, app_path, port=5000, app_name="App"):
         try:
             subprocess.Popen([sys.executable, app_path])
+            self.status_bar.config(text=f"{app_name} is starting...")
         except Exception as e:
-            self.status_bar.config(text=f"Error starting chat app: {str(e)}")
+            self.status_bar.config(text=f"Error starting {app_name}: {str(e)}")
     
-    def open_browser(self):
+    def open_browser(self, port=5000, app_type="app"):
         try:
-            webbrowser.open('http://127.0.0.1:5000')
-            self.status_bar.config(text="Chat application opened in browser")
+            url = f'http://127.0.0.1:{port}'
+            webbrowser.open(url)
+            self.status_bar.config(text=f"{app_type.capitalize()} opened in browser at {url}")
         except Exception as e:
             self.status_bar.config(text=f"Error opening browser: {str(e)}")
     

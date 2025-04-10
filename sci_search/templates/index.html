@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DBLP Publication Search</title>
+    <!-- Add Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #333;
+      }
+      .container {
+        margin-top: 30px;
+      }
+      .search-form {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+      }
+      .search-form input[type="text"] {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      .search-form button {
+        padding: 8px 16px;
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        font-size: 16px;
+      }
+      .search-form button:hover {
+        background-color: #3367d6;
+      }
+      .results {
+        margin-top: 20px;
+      }
+      .scientist-item {
+        cursor: pointer;
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .scientist-item:hover {
+        background-color: #f0f7ff;
+        border-color: #a1c4fd;
+      }
+      .publication-year {
+        background-color: #f5f5f5;
+        padding: 15px;
+        margin-top: 25px;
+        border-left: 4px solid #4285f4;
+        border-radius: 0 4px 4px 0;
+      }
+      .publication-year h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+      .publication-item {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s;
+      }
+      .publication-item:hover {
+        background-color: #fafafa;
+      }
+      .publication-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 1.05em;
+      }
+      .publication-meta {
+        margin-bottom: 5px;
+        color: #555;
+      }
+      .publication-meta i {
+        width: 18px;
+        text-align: center;
+        margin-right: 6px;
+        color: #666;
+      }
+      .publication-links {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .pub-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 0.9em;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .pub-link i {
+        margin-right: 5px;
+      }
+      .pub-link-dblp {
+        background-color: #e8f0fe;
+        color: #1a73e8;
+      }
+      .pub-link-dblp:hover {
+        background-color: #d2e3fc;
+      }
+      .pub-link-doi {
+        background-color: #ffecb3;
+        color: #e65100;
+      }
+      .pub-link-doi:hover {
+        background-color: #ffe082;
+      }
+      .pub-link-pdf {
+        background-color: #ffcdd2;
+        color: #c62828;
+      }
+      .pub-link-pdf:hover {
+        background-color: #ef9a9a;
+      }
+      .pub-link-url {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+      .pub-link-url:hover {
+        background-color: #c8e6c9;
+      }
+      .dblp-link {
+        color: #1a73e8;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .dblp-link:hover {
+        text-decoration: underline;
+      }
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 25px;
+      }
+      .loading i {
+        font-size: 24px;
+        color: #4285f4;
+      }
+      .status {
+        margin: 15px 0;
+        padding: 12px 15px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        border-left: 4px solid transparent;
+      }
+      .success {
+        color: #1b5e20;
+        background-color: #e8f5e9;
+        border-left-color: #4caf50;
+      }
+      .error {
+        color: #b71c1c;
+        background-color: #ffebee;
+        border-left-color: #ef5350;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><i class="fas fa-search"></i> 计算机科学家论文搜索</h1>
+    <div class="container">
+      <div class="search-form">
+        <input
+          type="text"
+          id="scientist-name"
+          placeholder="输入计算机科学家姓名，例如：Ya-qin Zhang"
+        />
+        <button id="search-button"><i class="fas fa-search"></i> 搜索</button>
+      </div>
+
+      <div id="status" class="status" style="display: none"></div>
+
+      <div id="loading" class="loading">
+        <p><i class="fas fa-spinner fa-spin"></i> 正在搜索，请稍候...</p>
+      </div>
+
+      <div id="scientists-list" class="results" style="display: none">
+        <h2><i class="fas fa-user-graduate"></i> 搜索结果</h2>
+        <p>找到多位与您的搜索匹配的科学家，请选择一位：</p>
+        <div id="scientists-container"></div>
+      </div>
+
+      <div id="publications-container" class="results" style="display: none">
+        <h2 id="scientist-header"></h2>
+        <div id="publications-list"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const searchButton = document.getElementById("search-button");
+        const scientistInput = document.getElementById("scientist-name");
+        const loading = document.getElementById("loading");
+        const statusDiv = document.getElementById("status");
+        const scientistsList = document.getElementById("scientists-list");
+        const scientistsContainer = document.getElementById(
+          "scientists-container"
+        );
+        const publicationsContainer = document.getElementById(
+          "publications-container"
+        );
+        const scientistHeader = document.getElementById("scientist-header");
+        const publicationsList = document.getElementById("publications-list");
+
+        let currentScientistName = "";
+
+        // Search for scientists when the button is clicked
+        searchButton.addEventListener("click", searchScientist);
+
+        // Also search when Enter key is pressed in the input field
+        scientistInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            searchScientist();
+          }
+        });
+
+        // Function to get appropriate icon for link type
+        function getLinkIcon(linkText, url) {
+          linkText = linkText.toLowerCase();
+
+          if (url.includes("doi.org") || linkText.includes("doi")) {
+            return '<i class="fas fa-link"></i>';
+          } else if (linkText.includes("pdf") || url.endsWith(".pdf")) {
+            return '<i class="fas fa-file-pdf"></i>';
+          } else if (
+            linkText.includes("html") ||
+            linkText.includes("www") ||
+            linkText.includes("http")
+          ) {
+            return '<i class="fas fa-globe"></i>';
+          } else if (linkText.includes("dblp")) {
+            return '<i class="fas fa-book"></i>';
+          } else if (
+            linkText.includes("video") ||
+            url.includes("youtube") ||
+            url.includes("vimeo")
+          ) {
+            return '<i class="fas fa-video"></i>';
+          } else if (url.includes("arxiv")) {
+            return '<i class="fas fa-file-alt"></i>';
+          } else {
+            return '<i class="fas fa-external-link-alt"></i>';
+          }
+        }
+
+        // Function to get link class based on its type
+        function getLinkClass(linkText, url) {
+          linkText = linkText.toLowerCase();
+
+          if (url.includes("doi.org") || linkText.includes("doi")) {
+            return "pub-link-doi";
+          } else if (linkText.includes("pdf") || url.endsWith(".pdf")) {
+            return "pub-link-pdf";
+          } else if (url.includes("dblp.org")) {
+            return "pub-link-dblp";
+          } else {
+            return "pub-link-url";
+          }
+        }
+
+        function searchScientist() {
+          const name = scientistInput.value.trim();
+          currentScientistName = name;
+
+          if (!name) {
+            showStatus("请输入科学家姓名", "error");
+            return;
+          }
+
+          showLoading(true);
+          showStatus("正在从DBLP搜索 " + name, "success");
+
+          // Clear previous results
+          scientistsContainer.innerHTML = "";
+          publicationsContainer.style.display = "none";
+          scientistsList.style.display = "none";
+
+          // Create form data
+          const formData = new FormData();
+          formData.append("name", name);
+
+          // Send the search request
+          fetch("/search", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              showLoading(false);
+
+              if (data.error) {
+                showStatus(data.error, "error");
+                return;
+              }
+
+              // Check if multiple scientists were returned
+              if (
+                data.multiple &&
+                data.scientists &&
+                data.scientists.length > 0
+              ) {
+                // Display the list of scientists
+                displayScientistsList(data.scientists);
+              } else {
+                // Display publications for the single scientist
+                displayPublications(data);
+              }
+            })
+            .catch((error) => {
+              showLoading(false);
+              showStatus("搜索失败: " + error, "error");
+            });
+        }
+
+        function displayScientistsList(scientists) {
+          // Clear any previous list
+          scientistsContainer.innerHTML = "";
+
+          // Display each scientist as a selectable item
+          scientists.forEach((scientist, index) => {
+            const scientistElement = document.createElement("div");
+            scientistElement.className = "scientist-item";
+            scientistElement.innerHTML = `<i class="fas fa-user-graduate"></i> <strong>${scientist.name}</strong> - <span>${scientist.url}</span>`;
+
+            // Add click handler to select this scientist
+            scientistElement.addEventListener("click", function () {
+              selectScientist(index);
+            });
+
+            scientistsContainer.appendChild(scientistElement);
+          });
+
+          // Show the scientists list
+          scientistsList.style.display = "block";
+        }
+
+        function selectScientist(index) {
+          showLoading(true);
+          showStatus(`正在选择科学家...`, "success");
+
+          // Hide the scientists list
+          scientistsList.style.display = "none";
+
+          // Create form data for the scientist selection
+          const formData = new FormData();
+          formData.append("name", currentScientistName);
+          formData.append("index", index);
+
+          // Send request to select the scientist
+          fetch("/select_scientist", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              showLoading(false);
+
+              if (data.error) {
+                showStatus(data.error, "error");
+                return;
+              }
+
+              // Display publications for the selected scientist
+              displayPublications(data);
+            })
+            .catch((error) => {
+              showLoading(false);
+              showStatus("选择科学家失败: " + error, "error");
+            });
+        }
+
+        function displayPublications(scientist) {
+          // Show loading while fetching publications
+          showLoading(true);
+          showStatus(`正在获取 ${scientist.name} 的发表论文列表...`, "success");
+
+          // Set scientist name in the header
+          scientistHeader.innerHTML = `<i class="fas fa-book"></i> ${scientist.name} 的发表论文列表`;
+
+          // Create form data for publications request
+          const formData = new FormData();
+          formData.append("url", scientist.url);
+          formData.append("name", scientist.name);
+
+          // Send the request to get publications
+          fetch("/publications", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              showLoading(false);
+
+              if (data.error) {
+                showStatus(data.error, "error");
+                return;
+              }
+
+              // Display success message
+              showStatus(
+                `<i class="fas fa-check-circle"></i> 找到 ${data.total} 篇论文，已保存到 ${data.filepath}`,
+                "success"
+              );
+
+              // Clear previous list
+              publicationsList.innerHTML = "";
+
+              // Display all publications grouped by year
+              data.publications.forEach((yearGroup) => {
+                const yearElement = document.createElement("div");
+                yearElement.className = "publication-year";
+                yearElement.innerHTML = `<h3><i class="fas fa-calendar-alt"></i> ${yearGroup.year} (${yearGroup.publications.length} 篇论文)</h3>`;
+                publicationsList.appendChild(yearElement);
+
+                // Add each publication for this year
+                yearGroup.publications.forEach((pub) => {
+                  const pubElement = document.createElement("div");
+                  pubElement.className = "publication-item";
+
+                  // Create title with link to DBLP entry if available
+                  let titleHtml = "";
+                  if (pub.dblp_url) {
+                    titleHtml = `<div class="publication-title"><a href="${
+                      pub.dblp_url
+                    }" class="dblp-link" target="_blank"><i class="fas fa-book"></i> ${
+                      pub.title || "无标题"
+                    }</a></div>`;
+                  } else {
+                    titleHtml = `<div class="publication-title"><i class="fas fa-file-alt"></i> ${
+                      pub.title || "无标题"
+                    }</div>`;
+                  }
+
+                  let pubHtml = titleHtml;
+
+                  pubHtml += '<div class="publication-meta">';
+
+                  if (pub.authors && pub.authors.length > 0) {
+                    pubHtml += `<div><i class="fas fa-users"></i> ${pub.authors.join(
+                      ", "
+                    )}</div>`;
+                  }
+
+                  if (pub.venue) {
+                    pubHtml += `<div><i class="fas fa-university"></i> ${pub.venue}</div>`;
+                  }
+
+                  if (pub.type) {
+                    pubHtml += `<div><i class="fas fa-bookmark"></i> ${pub.type}</div>`;
+                  }
+
+                  pubHtml += "</div>";
+
+                  // Add links to publication if available
+                  if (pub.links && pub.links.length > 0) {
+                    pubHtml += `<div class="publication-links">`;
+                    pub.links.forEach((link) => {
+                      const icon = getLinkIcon(link.text, link.url);
+                      const linkClass = getLinkClass(link.text, link.url);
+                      pubHtml += `<a href="${link.url}" class="pub-link ${linkClass}" target="_blank">${icon} ${link.text}</a>`;
+                    });
+                    pubHtml += `</div>`;
+                  }
+
+                  pubElement.innerHTML = pubHtml;
+                  publicationsList.appendChild(pubElement);
+                });
+              });
+
+              // Show the publications container
+              publicationsContainer.style.display = "block";
+            })
+            .catch((error) => {
+              showLoading(false);
+              showStatus(
+                `<i class="fas fa-exclamation-circle"></i> 获取论文列表失败: ${error}`,
+                "error"
+              );
+            });
+        }
+
+        function showLoading(show) {
+          if (show) {
+            loading.style.display = "block";
+          } else {
+            loading.style.display = "none";
+          }
+        }
+
+        function showStatus(message, type) {
+          statusDiv.innerHTML = message;
+          statusDiv.className = "status " + type;
+          statusDiv.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>
