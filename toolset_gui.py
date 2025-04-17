@@ -274,13 +274,13 @@ class ToolsetApp:
         def ensure_processes_terminated(self):
             """Ensure all processes are terminated after a delay."""
             # Make sure all processes are really dead
-            still_alive = []
+        self.still_alive = []
         for proc_info in self.processes:
             if proc_info['process'].poll() is None:  # None means still running
-                still_alive.append(proc_info)
+                self.still_alive.append(proc_info)
                 
         # Force kill any remaining processes
-        for proc_info in still_alive:
+        for proc_info in self.still_alive:
             try:
                 self.status_bar.config(text=f"Force killing {proc_info['name']}...")
                 proc_info['process'].kill()

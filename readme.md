@@ -1,6 +1,40 @@
 # Homework #2 of Deep Learning
 
-1. added a chatbot 
+
+
+## Installation
+
+1. Create and activate a virtual environment:
+
+ ```bash
+python -m venv venv
+
+venv\Scripts\activate  # On Windows
+
+source venv/bin/activate  # On Unix/MacOS
+ ```
+
+
+
+2. Install the required dependencies:
+
+ ```bash
+pip install -r constraints.txt
+ ```
+
+
+
+3. run GUI
+
+```powershell
+py ./toolset_gui.py
+```
+
+
+
+## Functions
+
+1. a chatbot 
 
 - usage:
     - from the GUI
@@ -18,8 +52,8 @@
     ```python
     from chatbot import ChatBot
     # Initialize the chatbot
-    api_endpoint = "https://www.jcapikey.com/v1/chat/completions"  # Replace with your API endpoint
-    api_key = "sk-zhvgVgajM5AqJPmX63C02f93C37c44BeBc61457d49B638E6"  # Replace with your API key
+    api_endpoint = ""  # Replace with your API endpoint
+    api_key = ""  # Replace with your API key
     model_name = "gpt-4o"  # Replace with your desired model name
 
     chatbot = ChatBot(api_endpoint, api_key, model_name)
@@ -33,7 +67,7 @@
 
 
 
-2. added a scientist paper search bot
+2. a scientist paper search bot
 
 - usage:
 
