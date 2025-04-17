@@ -42,9 +42,9 @@ class ToolsetCLI:
                 "handler": self.open_sci_search
             },
             "3": {
-                "name": "Future Tool 2",
-                "description": "Coming soon: Description of future tool 2",
-                "handler": lambda: self.show_message("Future Tool 2 coming soon!")
+                "name": "ChemSearch Tool",
+                "description": "Search for chemical elements and their properties",
+                "handler": self.open_chem_search
             },
             "4": {
                 "name": "Future Tool 3",
@@ -245,6 +245,26 @@ class ToolsetCLI:
         print("Waiting for server to start...")
         time.sleep(1.5)
         self.open_browser(5001, "SciSearch")
+        
+        # Return to the main menu after a brief pause
+        input("\nPress Enter to return to the main menu...")
+
+    def open_chem_search(self):
+        """Start the ChemSearch application and open it in a browser."""
+        print("Starting ChemSearch application...")
+        
+        # Determine the path to the chem_search application
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        chem_search_dir = os.path.join(current_dir, 'chem_search')
+        app_path = os.path.join(chem_search_dir, 'app.py')
+        
+        # Run Flask app in a separate thread
+        threading.Thread(target=self.run_flask_app, args=(app_path, 5004, 'ChemSearch')).start()
+        
+        # Give Flask a moment to start
+        print("Waiting for server to start...")
+        time.sleep(1.5)
+        self.open_browser(5004, "ChemSearch")
         
         # Return to the main menu after a brief pause
         input("\nPress Enter to return to the main menu...")

@@ -89,9 +89,9 @@ class ToolsetApp:
                              "Search for computer scientists and their publications on DBLP", 
                              self.open_sci_search)
         
-        self.create_tool_card(1, 0, "Future Tool 2", 
-                             "Coming soon: Description of future tool 2", 
-                             lambda: self.show_message("Future Tool 2 coming soon!"))
+        self.create_tool_card(1, 0, "ChemSearch Tool", 
+                             "Search for chemical elements and their properties", 
+                             self.open_chem_search)
         
         self.create_tool_card(1, 1, "Future Tool 3", 
                              "Coming soon: Description of future tool 3", 
@@ -169,6 +169,20 @@ class ToolsetApp:
         
         # Give Flask a moment to start
         self.root.after(1500, lambda: self.open_browser(5001, "SciSearch"))
+    
+    def open_chem_search(self):
+        self.status_bar.config(text="Starting ChemSearch application...")
+        
+        # Determine the path to the chem_search application
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        chem_search_dir = os.path.join(current_dir, 'chem_search')
+        app_path = os.path.join(chem_search_dir, 'app.py')
+        
+        # Run Flask app in a separate thread
+        threading.Thread(target=self.run_flask_app, args=(app_path, 5004, 'ChemSearch')).start()
+        
+        # Give Flask a moment to start
+        self.root.after(1500, lambda: self.open_browser(5004, "ChemSearch"))
     
     def run_flask_app(self, app_path, port=5000, app_name="App"):
         try:

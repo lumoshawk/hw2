@@ -74,3 +74,4 @@ coverage.xml
 # Other
 *.ipynb_checkpoints/
 sci_search/data/
+chem_search/elements/
